@@ -30,7 +30,7 @@ def search_song(song_name, artist_name):
 
             for song in songs[:5]:
                 song_id = song['id']
-                music_url = f"http://meting.arronhc.cyou/?type=url&id={song_id}"
+                music_url = "YOUR_API_HERE"
                 results.append({
                     'music_url': music_url,
                     'song_name': song['name'],
