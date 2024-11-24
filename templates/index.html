@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>音乐搜索下载</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .song-item {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 4px;
+            background-color: #fff;
+        }
+        .song-info {
+            margin-bottom: 10px;
+        }
+        .download-btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 3px;
+            text-decoration: none;
+            display: inline-block;
+            font-size: 14px;
+        }
+        .download-btn:hover {
+            background-color: #45a049;
+        }
+        .no-results {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>音乐搜索下载</h1>
+        <div class="form-group">
+            <label for="songName">歌名：</label>
+            <input type="text" id="songName" required>
+        </div>
+        <div class="form-group">
+            <label for="artistName">歌手名：（输入空格留空）</label>
+            <input type="text" id="artistName" required>
+        </div>
+        <button onclick="searchMusic()">搜索</button>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        async function searchMusic() {
+            const songName = document.getElementById('songName').value;
+            const artistName = document.getElementById('artistName').value;
+            const resultDiv = document.getElementById('result');
+
+            if (!songName || !artistName) {
+                resultDiv.innerHTML = '请输入歌名和歌手名';
+                return;
+            }
+
+            resultDiv.innerHTML = '搜索中...';
+
+            try {
+                const response = await fetch('/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        song_name: songName,
+                        artist_name: artistName
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.results && data.results.length > 0) {
+                    let resultsHtml = '<h3>搜索结果：</h3>';
+                    data.results.forEach((song, index) => {
+                        resultsHtml += `
+                            <div class="song-item">
+                                <div class="song-info">
+                                    <strong>${index + 1}. ${song.song_name}</strong>
+
+                                    歌手：${song.artist_name}
+
+                                    专辑：${song.album_name}
+                                </div>
+                                <a href="${song.music_url}" target="_blank" class="download-btn">下载</a>
+                            </div>
+                        `;
+                    });
+                    resultDiv.innerHTML = resultsHtml;
+                } else {
+                    resultDiv.innerHTML = '<p class="no-results">未找到匹配的歌曲</p>';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = '搜索出错，请稍后重试';
+                console.error('Error:', error);
+            }
+        }
+    </script>
+</body>
+</html>
